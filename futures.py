@@ -1,6 +1,7 @@
 import requests
 import json
 import pprint
+import argparse
 
 from datetime import datetime, timezone
 from dateutil import tz
@@ -13,6 +14,7 @@ class Futures:
     def __init__(self):
         self.url = 'https://futures.kraken.com/derivatives/api/v3'
         self.tickers()
+        self.pairs = ['xbtusd','ethusd']
 
     def tickers(self):
         response = requests.get(f'{self.url}/tickers')
@@ -24,9 +26,7 @@ class Futures:
     def tickers_print(self):
         print()
 
-        pairs = ['xbtusd','ethusd']
-
-        for pair in pairs:
+        for pair in self.pairs:
             real_time_index = self.real_time_index(pair)
             utils.cprint(f'{pair.upper()} real time index', Fore.CYAN)
             index_last = real_time_index['last']
@@ -52,10 +52,17 @@ class Futures:
                 if ticker['tag'] == period:
                     return ticker
 
-    def fixed_futures_symbols(self, pair):
+    def all_futures_symbols(self):
+        pairs = {}
+        # xbtusd, ethusd, etc ...
+        for pair in self.pairs:
+            pairs[pair] = self.futures_symbols(pair)
+        return pairs
+
+    def futures_symbols(self, pair):
         symbols = {}
         for ticker in self.tickers:
-            if f'fi_{pair}' in ticker['symbol']:
+            if any(item in ticker['symbol'] for item in [f'pi_{pair}',f'fi_{pair}']):
                 symbols[ticker['tag']] = ticker['symbol']
         return symbols
 
@@ -119,7 +126,34 @@ class Futures:
             # now = now.replace('+00:00', 'Z')
             return f'Server Time: {now.strftime("%H:%M:%S")} UTC'
 
-a = Futures()
+argparser = argparse.ArgumentParser(description='Crypto Futures')
 
-print(a.fixed_futures_symbols('xbtusd'))
-print(a.fixed_futures_symbols('ethusd'))
+argparser.add_argument("--summary", action='store_true', help="futures summary")
+
+argparser.add_argument("-p", "--provider", help="data provider")
+argparser.add_argument("--tickers", action='store_true', help="show tickers")
+argparser.add_argument("--symbols", action='store_true', help="ticker symbols only")
+
+args = argparser.parse_args()
+
+futures = Futures()
+
+if args.summary:
+    futures.tickers_print()
+
+if args.provider == 'kraken':
+    data = {}
+
+    # add provider info
+    data['provider'] = args.provider
+
+    # check that tickers are available
+    if args.tickers:
+        # all data
+        if not args.symbols:
+            data = futures.tickers
+        # only ticker symbols
+        else:
+            data['pairs'] = futures.all_futures_symbols()
+
+    print(json.dumps(data))

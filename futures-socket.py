@@ -3,25 +3,73 @@
 # https://support.kraken.com/hc/en-us/articles/360022635632-Subscriptions-WebSockets-API-
 # https://support.kraken.com/hc/en-us/articles/360022635992-Ticker
 
+from futures import Futures
+
 import websocket
 import _thread
 import time
+import sys
+import json
+
+from colorama import Fore
+
+from utils import utils
+
+ws = None
 
 def ws_message(ws, message):
-    print("WebSocket Thread: %s" % message)
+    # utils.cprint("\nWebSocket Thread: %s" % message, Fore.YELLOW)
+
+    # print(message)
+
+    m = json.loads(message)
+    # print(m)
+
+    if m['product_id']:
+        if m['tag'] == 'semiannual':
+            print(f"{m['product_id']} {m['tag']} {m['markPrice']} {m['premium']}")
+
+    # SEND THE EMAIL !!!!!
+
+def on_error(ws, error):
+    utils.cprint(error, Fore.RED)
 
 def ws_open(ws):
-    subscribe = '{"event": "subscribe", "feed": "ticker", "product_ids": ["PI_XBTUSD","PI_ETHUSD"]}'
+    futures = Futures()
+    all_symbols = futures.all_futures_symbols()
+
+    ids = []
+    for pair in all_symbols:
+        pair_symbols = all_symbols[pair]
+        for period in pair_symbols:
+            symbol = pair_symbols[period]
+            ids.append(f'"{symbol}"')
+    product_ids = f'[{",".join(ids)}]'
+
+    # subscribe = '{"event": "subscribe", "feed": "ticker", "product_ids": ["PI_XBTUSD","PI_ETHUSD"]}'
+    subscribe = '{"event": "subscribe", "feed": "ticker", "product_ids": %s}' % product_ids
+
+    utils.cprint(subscribe, Fore.CYAN)
     ws.send(subscribe)
 
+def on_close(ws):
+    utils.cprint("WebSocket Closed", Fore.CYAN)
+
 def ws_thread(*args):
-    ws = websocket.WebSocketApp("wss://futures.kraken.com/ws/v1", on_open = ws_open, on_message = ws_message)
+    global ws
+    ws = websocket.WebSocketApp("wss://futures.kraken.com/ws/v1", on_open = ws_open, on_message = ws_message, on_error = on_error, on_close = on_close)
     ws.run_forever()
 
-# Start a new thread for the WebSocket interface
-_thread.start_new_thread(ws_thread, ())
+try:
+    # Start WebSocket Thread
+    _thread.start_new_thread(ws_thread, ())
 
-# Continue other (non WebSocket) tasks in the main thread
-while True:
-    time.sleep(5)
-    print("Main Thread: %d" % time.time())
+    # Main Thread
+    while True:
+        time.sleep(5)
+        utils.cprint("Main Thread: %s" % time.ctime(time.time()), Fore.CYAN)
+
+except KeyboardInterrupt:
+    ws.close()
+    print('\nBye :)\n')
+    sys.exit(0)

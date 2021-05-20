@@ -75,8 +75,9 @@ class Futures:
             mark = ff['markPrice']
             expiration = self.expiration(ff)
             delta = self.days_left(expiration)
+
             premium = (mark / index_last - 1) * 100
-            annualized_premium = premium / delta.days * 365
+            annualized_premium = premium / utils.days_delta_fractional(delta) * 365
 
             utils.cprint(f'{period} ({ff["symbol"]})', Fore.WHITE)
             utils.cprint(f'{self.expiration_format(expiration)} ({self.days_left_format(delta)})', Fore.RED)

@@ -32,7 +32,7 @@ email_sent = False
 # TODO: send email
 # TODO: frontend sms
 
-notifications = None
+alerts = None
 
 def send_email():
     try:
@@ -63,12 +63,12 @@ def ws_message(ws, message):
         if(not (pair and tag)):
             return
 
-        notifications=db.notifications.find({'sent': 0, 'pair': pair, 'period': tag})
-        process_notifications(notifications, message)
+        alerts=db.alerts.find({'sent': 0, 'pair': pair, 'period': tag})
+        process_alerts(alerts, message)
 
-def process_notifications(notifications, message):
-    # print(len(notifications))
-    # if(len(notifications) == 0):
+def process_alerts(alerts, message):
+    # print(len(alerts))
+    # if(len(alerts) == 0):
     #     return
 
     product_id = message.get('product_id')
@@ -102,8 +102,8 @@ def process_notifications(notifications, message):
 
     try:
         # utils.cprint(f'Annualized: {annualized}', Fore.YELLOW)
-        # utils.cprint(f'\n[ Notifications ({len(notifications)}) ]', Fore.CYAN)
-        # utils.pretty_print(notifications)
+        # utils.cprint(f'\n[ Alerts ({len(alerts)}) ]', Fore.CYAN)
+        # utils.pretty_print(alerts)
 
         values = { 'markPrice': markPrice, 'premium': premium, 'annualized': annualized }
         # print(values)
@@ -137,7 +137,7 @@ def process_notifications(notifications, message):
         #     #     utils.cprint(f'Value Reject {currentValue} {operator} {targetValue} {result}', Fore.WHITE)
         #     return result
 
-        for item in notifications:
+        for item in alerts:
             _id = item.get('_id')
 
             targetProperty = item.get('property')
@@ -150,8 +150,8 @@ def process_notifications(notifications, message):
                 print(f'{item.get("property")} {item.get("operator")} {item.get("value")}')
                 utils.cprint(f'Qualified / Notified', Fore.GREEN)
                 # print('qualified')
-                # result = db.notifications.delete_one({'_id': _id})
-                result = db.notifications.update_one(item, { '$set': { 'sent': 1 } })
+                # result = db.alerts.delete_one({'_id': _id})
+                result = db.alerts.update_one(item, { '$set': { 'sent': 1 } })
                 utils.cprint(f'DB Modified {result.modified_count}', Fore.CYAN)
                 # print(result.deleted_count)
             # else:
@@ -160,20 +160,20 @@ def process_notifications(notifications, message):
 
         # # utils.cprint(f'\n[ Qualification Checks ]', Fore.CYAN)
         # lambda_filter = lambda item: item_pass(item, pair, tag) and item_value_pass(item, pair, tag)
-        # qualified = list(filter(lambda_filter, notifications))
+        # qualified = list(filter(lambda_filter, alerts))
         # if len(qualified):
         #     utils.cprint(f'\n[ Qualified ({len(qualified)}) ]', Fore.CYAN)
         #     utils.pretty_print(qualified)
-        #     utils.cprint(f'\n[ Send Notifications ]', Fore.CYAN)
+        #     utils.cprint(f'\n[ Send Notification ]', Fore.CYAN)
         #     count = 0
         #     for item in qualified:
         #         utils.cprint(f'#{count+1} Email Sent', Fore.GREEN)
         #         utils.cprint(f'#{count+1} SMS Sent', Fore.GREEN)
-        #         notifications.remove(item)
+        #         alerts.remove(item)
         #         count += 1
 
-        # utils.cprint(f'\n[ Notifications Now ({len(notifications)}) ]', Fore.CYAN)
-        # utils.pretty_print(notifications)
+        # utils.cprint(f'\n[ Alerts Now ({len(alerts)}) ]', Fore.CYAN)
+        # utils.pretty_print(alerts)
     except Exception as e:
         print(f'Error -> {e}')
 
@@ -227,9 +227,9 @@ def add_dummy_db_data():
     ]
 
     # purge
-    db.notifications.delete_many({'user': 'fundalytica'})
+    db.alerts.delete_many({'user': 'fundalytica'})
     # add
-    db.notifications.insert_many(data)
+    db.alerts.insert_many(data)
 
 try:
     add_dummy_db_data()

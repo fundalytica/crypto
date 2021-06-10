@@ -16,7 +16,7 @@ import json
 from colorama import Fore, Style
 from datetime import datetime, timezone, timedelta
 
-from utils import utils, mailer
+from fundalytica_utils import utils, mailer
 
 from pymongo import MongoClient
 mongo = MongoClient('mongodb://localhost')

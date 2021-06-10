@@ -8,7 +8,7 @@ from dateutil import tz
 
 from colorama import Fore
 
-from utils import utils
+from fundalytica_utils import utils
 
 class Futures:
     def __init__(self):

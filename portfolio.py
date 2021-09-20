@@ -53,6 +53,6 @@ args = argparser.parse_args()
 if args.db:
     database = get_database(CONNECTION_STRING, args.db)
 
-    collection_name = "crypto"
+    collection_name = "crypto_portfolio"
     collection = database[collection_name]
     print_json(collection)

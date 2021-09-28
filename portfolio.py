@@ -10,49 +10,47 @@ def get_database(connection_string, database):
     client = pymongo.MongoClient(connection_string)
     return client[database]
 
-def create_index(collection):
-    collection.create_index("symbol", unique=True)
+# def create_index(collection):
+#     collection.create_index("symbol", unique=True)
 
-def insert_item(collection):
-    collection.insert_one({"symbol": "doge", "amount": 1000, "basis": 1})
+# def insert_item(collection):
+#     collection.insert_one({"symbol": "doge", "amount": 1000, "basis": 1})
 
-def print_cursor(collection):
-    cursor = collection.find()
+# def print_df(assets):
+#     from pandas import DataFrame
+#     df = DataFrame(assets)
 
-    for asset in cursor:
-        print(asset["symbol"], asset["amount"], asset["basis"])
+#     column_names = ["symbol", "amount", "cost"]
+#     df = df.reindex(columns=column_names)
 
-def print_df(collection):
-    cursor = collection.find()
+#     print(df)
 
-    from pandas import DataFrame
-    df = DataFrame(cursor)
-
-    del df["_id"]
-
-    column_names = ["symbol", "amount", "basis"]
-    df = df.reindex(columns=column_names)
-
-    print(df)
-
-def print_json(collection):
-    cursor = collection.find()
-    list_cur = list(cursor)
-
-    for asset in list_cur:
-        del asset["_id"]
-
-    json_data = json.dumps(list_cur)
+def print_json(portfolio):
+    json_data = json.dumps(portfolio)
     print(json_data)
 
 # argparse
 argparser = argparse.ArgumentParser(description="Crypto Portfolio")
-argparser.add_argument("-db", help="database name")
+argparser.add_argument("-db", help="database name", required=True)
+argparser.add_argument("-user", help="user identifier", required=True)
 args = argparser.parse_args()
 
 if args.db:
     database = get_database(CONNECTION_STRING, args.db)
 
-    collection_name = "crypto_portfolio"
+    collection_name = "crypto_portfolios"
     collection = database[collection_name]
-    print_json(collection)
+    portfolio = collection.find_one({"email": args.user})
+
+    if portfolio:
+        for asset in portfolio["assets"]:
+            del asset["_id"]
+
+        del portfolio["_id"]
+        del portfolio["__v"]
+        del portfolio["email"]
+
+        print_json(portfolio)
+    else:
+        print_json({"assets": []})
+

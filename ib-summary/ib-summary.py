@@ -750,33 +750,30 @@ def runOptionTrades():
     print()
     print(tabulate(stock_trades, headers=stock_header))
 
+argparser = argparse.ArgumentParser(description='Interactive Brokers summary report')
+argparser.add_argument("-data", help="data path", required=True)
+# argparser.add_argument("-p", "--period", choices=['all', 'ytd'], help="reporting period")
+argparser.add_argument("-s", "--symbol", help="stock symbol")
+argparser.add_argument("--trades", action='store_true', help="show trades")
+argparser.add_argument("--options", action='store_true', help="options positions")
+argparser.add_argument("--json", action='store_true', help="json format")
+args = argparser.parse_args()
+
 parser = IBCSVParser()
 
-directory = f'{utils.file_path(__file__)}/data/'
+directory = args.data + '/'
+# directory = f'{utils.file_path(__file__)}/data/'
 
 files = []
-for r, d, f in os.walk(directory):
+for r, d, f in os.walk(directory  ):
     for file in f:
         if file.endswith('.csv'):
             files.append(file)
 files.sort()
 
 if(len(files) == 0):
-    print(f'{Fore.CYAN}csv data folder: {directory}')
     print(f'{Fore.RED}no csv files found')
     exit()
-
-argparser = argparse.ArgumentParser(description='Interactive Brokers summary report')
-
-# argparser.add_argument("-p", "--period", choices=['all', 'ytd'], help="reporting period")
-
-argparser.add_argument("-s", "--symbol", help="stock symbol")
-argparser.add_argument("--trades", action='store_true', help="show trades")
-
-argparser.add_argument("--options", action='store_true', help="options positions")
-argparser.add_argument("--json", action='store_true', help="json format")
-
-args = argparser.parse_args()
 
 parser.clear()
 

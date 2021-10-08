@@ -80,10 +80,10 @@ def last_sales_total(acc, asset):
 
     return acc
 
-def lowest_listing_total(acc, asset):
+def lowest_listings_total(acc, asset):
     return order_accumulator(acc, asset, 1)
 
-def highest_offer_total(acc, asset):
+def highest_offers_total(acc, asset):
     return order_accumulator(acc, asset, 0)
 
 def order_accumulator(acc, asset, side):
@@ -131,8 +131,8 @@ def output():
 
     totals = [
         { 'description': 'Last Sales Total', 'method': last_sales_total },
-        { 'description': 'Lowest Listings Total', 'method': lowest_listing_total },
-        { 'description': 'Highest Offers Total', 'method': highest_offer_total },
+        { 'description': 'Lowest Listings Total', 'method': lowest_listings_total },
+        { 'description': 'Highest Offers Total', 'method': highest_offers_total },
     ]
 
     for t in totals:

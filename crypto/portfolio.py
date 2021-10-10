@@ -43,7 +43,10 @@ if args.db:
     portfolio = collection.find_one({"email": args.user})
 
     if portfolio:
-        for asset in portfolio["assets"]:
+        for asset in portfolio["trades"]:
+            del asset["_id"]
+
+        for asset in portfolio["positions"]:
             del asset["_id"]
 
         del portfolio["_id"]
@@ -52,5 +55,4 @@ if args.db:
 
         print_json(portfolio)
     else:
-        print_json({"assets": []})
-
+        print_json({"trades": [], "positions": []})

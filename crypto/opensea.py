@@ -44,6 +44,9 @@ def best_order(asset, side):
 
     orders = data[asset]['orders']
 
+    # only orders with quantity of 1
+    orders = filter(lambda o: o['quantity'] == '1', orders)
+
     orders = filter(lambda o: o['side'] == side, orders)
     orders = sorted(orders, key=lambda k: float(k['current_price']), reverse=(side == 0))
 
@@ -107,7 +110,7 @@ def output():
         print(f"{data[asset]['permalink']}")
 
         # last sale
-        print(f"{color.YELLOW}[ Last Sale ]")
+        print(f"{color.CYAN}[ Last Sale ]")
         price, symbol, usd = last_sale_info(last_sale(asset))
         print(f'{price} {symbol} = {usd:,.0f} USD')
 

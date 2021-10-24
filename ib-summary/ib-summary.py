@@ -809,16 +809,16 @@ def header_split(data):
 def get_positions(category):
     # get options positions from csv file
     open_positions = parser.open_positions_group()
-    options = parser.group_with_column_name(open_positions, 'Header', 'Data')
-    options = parser.group_with_column_name(options, 'Asset Category', category)
+    pos = parser.group_with_column_name(open_positions, 'Header', 'Data')
+    pos = parser.group_with_column_name(pos, 'Asset Category', category)
 
     # separate header from data
-    header, options = header_split(options)
+    header, pos = header_split(pos)
 
     # drop columns
     drop = ['Open Positions','Header','DataDiscriminator','Asset Category','Currency','Mult','Cost Price','Close Price','Value','Unrealized P/L','Code']
 
-    return drop_columns(drop, header, options)
+    return drop_columns(drop, header, pos)
 
 def get_performance():
     # get performance from csv file to get symbol current price
@@ -897,14 +897,13 @@ if args.json:
         o_header, options = get_positions('Equity and Index Options')
         o_header, options = add_performance(o_header, options)
         o_header, options = split_option_symbol(o_header, options)
-
         options = json_transformations(o_header, options)
-        data['positions'] = options
+        data['options'] = options
 
-        w_header, warrants = get_positions('Warrants')
-        # w_header, warrants = add_performance(w_header, warrants)
-        warrants = json_transformations(w_header, warrants)
-        data['positions'] += warrants
+        s_header, stocks = get_positions('Stocks')
+        stocks = json_transformations(s_header, stocks)
+
+        data['stocks'] = stocks
 
         data['period'] = parser.report_period()
         data['generated'] = parser.report_generated()

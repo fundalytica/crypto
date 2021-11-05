@@ -3,7 +3,8 @@ import datetime, pytz
 
 import argparse
 
-from utils import utils, stock
+from fundalytica_utils import utils, stock
+
 from yahoo import Yahoo
 
 def run():
@@ -16,11 +17,15 @@ def run():
     yahoo = Yahoo()
     info = yahoo.request_quote(symbol)
 
-    ask = info['ask']
+    price = info['currentPrice']
+
     previousClose = info['previousClose']
 
     nyc_datetime = datetime.datetime.now(pytz.timezone('US/Eastern'))
-    isUSMarketOpen = stock.isUSMarketOpen(nyc_datetime)
+    # isUSMarketOpen = stock.isUSMarketOpen(nyc_datetime)
+
+    ask = info['ask']
+    isMarketOpen = (ask > 0)
 
     date_fmt = "%B %d, %Y"
     time_fmt = "%I:%M:%S %p"
@@ -28,10 +33,17 @@ def run():
     data = {}
     data["date"] = nyc_datetime.strftime(date_fmt)
     data["time"] = nyc_datetime.strftime(time_fmt)
+
     data["symbol"] = args.symbol
-    data["price"] = ask
-    data["change"] = round((ask / previousClose) - 1, 5)
-    data["market"] = "open" if isUSMarketOpen else "closed"
+
+    # data["price"] = ask
+    data["price"] = price
+
+    # data["change"] = round((ask / previousClose) - 1, 5)
+    data["change"] = round((price / previousClose) - 1, 5)
+
+    data["market"] = "open" if isMarketOpen else "closed"
+
     print(json.dumps(data))
 
 run()

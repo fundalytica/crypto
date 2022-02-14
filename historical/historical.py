@@ -1,4 +1,5 @@
 import json
+import os
 
 import argparse
 from colorama import Fore
@@ -159,6 +160,8 @@ dip = None
 
 if all is None:
     print(json.dumps({"error": "no data"}))
+    with open(os.path.dirname(os.path.realpath(__file__)) + '/missing.log', 'a') as f:
+        f.write(f'{symbol}\n')
     exit()
 
 # historical data

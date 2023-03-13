@@ -2,6 +2,9 @@ keys.py
 ib-summary/data/
 iex-historical/
 
+node_modules
+*.csv
+
 # Byte-compiled / optimized / DLL files
 __pycache__/
 *.py[cod]

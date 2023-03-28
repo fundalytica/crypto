@@ -202,44 +202,49 @@ def print_options_table(options, currency, price = 0, size = 1):
 test = False
 deribit = Deribit('test' if test else 'www')
 
-import inquirer
-questions = [
-    inquirer.List('currency', message="Pick your coin", choices=['BTC', 'ETH', 'SOL'])
-]
-currency = inquirer.prompt(questions)['currency']
-
-size = 1
-minimum_days = 20
-# minimum_days = 2
-strike_distance_pct = 10
-# strike_distance_pct = 2
-
-price = 0
-
-deribit.load_index(currency)
-index = deribit.index[currency]
-print(f'[green][ {currency} @ {index:,} ][/green]')
-
-deribit.load_instruments(currency)
-options = deribit.instruments[currency]
-options = filter_options(options, 'call', minimum_days, strike_distance_pct)
-
-print(f'[yellow][ Size : {size:,} ][/yellow]')
-print(f'[yellow][ Minimum Days : {minimum_days:,} days ][/yellow]')
-print(f'[yellow][ Strike Distance : -/+ {strike_distance_pct:,}% ][/yellow]')
-if price:
-    print(f'[yellow][ Price @ {price:,} ][/yellow]')
-
-print_options_table(options, currency, price, size)
-
-# place your 10K trade
-
-# import argparse
-# argparser = argparse.ArgumentParser(description='Crypto Futures')
-# argparser.add_argument("--summary", action='store_true', help="futures summary")
-# argparser.add_argument("-p", "--provider", help="data provider")
+import argparse
+argparser = argparse.ArgumentParser(description='Deribit Crypto Options')
+argparser.add_argument("-c", "--currency", help="currency")
 # argparser.add_argument("--tickers", action='store_true', help="show tickers")
-# argparser.add_argument("--symbols", action='store_true', help="ticker symbols only")
-# args = argparser.parse_args()
-# if args.summary:
-# if args.provider == 'kraken':
+args = argparser.parse_args()
+
+if args.currency:
+    currency = args.currency
+    deribit.load_index(currency)
+    index = deribit.index[currency]
+    deribit.load_instruments(currency)
+    options = deribit.instruments[currency]
+
+    data = {"currency": currency, "index": index, "options": options}
+    json = json.dumps(data)
+    print(json)
+else:
+    import inquirer
+    questions = [
+        inquirer.List('currency', message="Pick your coin", choices=['BTC', 'ETH', 'SOL'])
+    ]
+    currency = inquirer.prompt(questions)['currency']
+
+    size = 1
+    minimum_days = 20
+    # minimum_days = 2
+    strike_distance_pct = 10
+    # strike_distance_pct = 2
+
+    price = 0
+
+    deribit.load_index(currency)
+    index = deribit.index[currency]
+    print(f'[green][ {currency} @ {index:,} ][/green]')
+
+    deribit.load_instruments(currency)
+    options = deribit.instruments[currency]
+    options = filter_options(options, 'call', minimum_days, strike_distance_pct)
+
+    print(f'[yellow][ Size : {size:,} ][/yellow]')
+    print(f'[yellow][ Minimum Days : {minimum_days:,} days ][/yellow]')
+    print(f'[yellow][ Strike Distance : -/+ {strike_distance_pct:,}% ][/yellow]')
+    if price:
+        print(f'[yellow][ Price @ {price:,} ][/yellow]')
+
+    print_options_table(options, currency, price, size)

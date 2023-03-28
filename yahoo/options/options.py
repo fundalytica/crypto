@@ -80,13 +80,20 @@ print(calls_table)
 print(Fore.YELLOW + f"Loading puts table for {symbol} on {expiration_date}..." + Style.RESET_ALL, end="", flush=True)
 puts_table = tabulate(puts.head(), headers=puts.columns, tablefmt="simple")
 
+print(puts)
 for index, row in puts.iterrows():
     second_column_value = row[1]
+    print(row)
+    print(row[1])
     if (current_price * 0.9) <= second_column_value <= (current_price * 1.1):
+        print(index)
         table_index = index + 2
-        puts_table = puts_table.split("\n")
-        puts_table[table_index] = Fore.CYAN + puts_table[table_index] + Style.RESET_ALL  # Make the row green
-        puts_table = "\n".join(puts_table)
+        print(table_index)
+        print(len(puts.index))
+        if table_index < len(puts.index):
+            puts_table = puts_table.split("\n")
+            puts_table[table_index] = Fore.CYAN + puts_table[table_index] + Style.RESET_ALL  # Make the row green
+            puts_table = "\n".join(puts_table)
 
 print(Fore.GREEN + "DONE" + Style.RESET_ALL)
 print(Fore.RED + "\nPuts:" + Style.RESET_ALL)
